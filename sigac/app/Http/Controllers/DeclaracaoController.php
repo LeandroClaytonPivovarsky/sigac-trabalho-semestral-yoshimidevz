@@ -4,52 +4,69 @@ namespace App\Http\Controllers;
 
 use App\Models\Declaracao;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 
 class DeclaracaoController extends Controller
 {
     public function index()
     {
-        $declaracoes = Declaracao::with(['aluno', 'comprovante'])
-            ->orderBy('data', 'desc')
+        $declaracoes = Declaracao::with(['aluno'])
+            ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return response()->json($declaracoes);
+        return view('declaracoes.index', compact('declaracoes'));
+    }
+
+    public function create()
+    {
+        return view('declaracoes.create');
     }
 
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'aluno_id' => 'required|exists:alunos,id',
-            'comprovante_id' => 'required|exists:comprovantes,id',
-            'data' => 'required|date',
+        $request->validate([
+            'titulo' => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+            'conteudo' => 'required|string',
+            'data_emissao' => 'required|date',
+            'aluno_id' => 'required|exists:alunos,id'
         ]);
 
-        $validated['hash'] = bin2hex(random_bytes(32));
+        $declaracao = Declaracao::create($request->all());
 
-        $declaracao = DB::transaction(fn () => Declaracao::create($validated));
-
-        return response()->json($declaracao, 201);
+        return redirect()->route('declaracoes.index')
+            ->with('success', 'Declaração cadastrada com sucesso!');
     }
 
     public function show($id)
     {
-        $declaracao = Declaracao::with(['aluno', 'comprovante'])->findOrFail($id);
+        $declaracao = Declaracao::with(['aluno'])
+            ->findOrFail($id);
 
-        return response()->json($declaracao);
+        return view('declaracoes.show', compact('declaracao'));
+    }
+
+    public function edit($id)
+    {
+        $declaracao = Declaracao::findOrFail($id);
+        return view('declaracoes.edit', compact('declaracao'));
     }
 
     public function update(Request $request, $id)
     {
         $declaracao = Declaracao::findOrFail($id);
 
-        $validated = $request->validate([
-            'data' => 'sometimes|date',
+        $request->validate([
+            'titulo' => 'sometimes|string|max:255',
+            'descricao' => 'nullable|string',
+            'conteudo' => 'sometimes|string',
+            'data_emissao' => 'sometimes|date',
+            'aluno_id' => 'sometimes|exists:alunos,id'
         ]);
 
-        $declaracao->update($validated);
+        $declaracao->update($request->all());
 
-        return response()->json($declaracao);
+        return redirect()->route('declaracoes.index')
+            ->with('success', 'Declaração atualizada com sucesso!');
     }
 
     public function destroy($id)
@@ -57,7 +74,8 @@ class DeclaracaoController extends Controller
         $declaracao = Declaracao::findOrFail($id);
         $declaracao->delete();
 
-        return response()->json(null, 204);
+        return redirect()->route('declaracoes.index')
+            ->with('success', 'Declaração excluída com sucesso!');
     }
 
     public function restore($id)
@@ -65,30 +83,7 @@ class DeclaracaoController extends Controller
         $declaracao = Declaracao::withTrashed()->findOrFail($id);
         $declaracao->restore();
 
-        return response()->json($declaracao);
-    }
-
-    public function search(Request $request)
-    {
-        $query = Declaracao::query();
-
-        if ($request->has('hash')) {
-            $query->where('hash', 'like', '%' . $request->hash . '%');
-        }
-
-        if ($request->has('aluno_id')) {
-            $query->where('aluno_id', $request->aluno_id);
-        }
-
-        if ($request->has(['data_inicio', 'data_fim'])) {
-            $query->whereBetween('data', [
-                $request->data_inicio,
-                $request->data_fim
-            ]);
-        }
-
-        $resultados = $query->with(['aluno', 'comprovante'])->paginate(10);
-
-        return response()->json($resultados);
+        return redirect()->route('declaracoes.index')
+            ->with('success', 'Declaração restaurada com sucesso!');
     }
 }

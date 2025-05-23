@@ -14,7 +14,12 @@ class AlunoController extends Controller
             ->orderBy('nome')
             ->paginate(10);
 
-        return View('alunos/index');
+        return view('alunos.index', compact('alunos'));
+    }
+
+    public function create()
+    {
+        return view('alunos.create');
     }
 
     public function store(Request $request)
@@ -34,7 +39,8 @@ class AlunoController extends Controller
 
         $aluno = Aluno::create($dados);
 
-        return response()->json($aluno, 201);
+        return redirect()->route('alunos.index')
+            ->with('success', 'Aluno cadastrado com sucesso!');
     }
 
     public function show($id)
@@ -42,7 +48,13 @@ class AlunoController extends Controller
         $aluno = Aluno::with(['curso', 'turma', 'user'])
             ->findOrFail($id);
 
-        return response()->json($aluno);
+        return view('alunos.show', compact('aluno'));
+    }
+
+    public function edit($id)
+    {
+        $aluno = Aluno::findOrFail($id);
+        return view('alunos.edit', compact('aluno'));
     }
 
     public function update(Request $request, $id)
@@ -55,12 +67,19 @@ class AlunoController extends Controller
             'email' => 'sometimes|email|unique:alunos,email,' . $aluno->id,
             'senha' => 'sometimes|string|min:6',
             'curso_id' => 'sometimes|exists:cursos,id',
-            'turma_id' => 'sometimes|exists:turmas,id'
+            'turma_id' => 'sometimes|exists:turmas,id',
+            'user_id' => 'sometimes|exists:users,id'
         ]);
 
-        $aluno->update($request->all());
+        $dados = $request->all();
+        if ($request->has('senha')) {
+            $dados['senha'] = Hash::make($request->senha);
+        }
 
-        return response()->json($aluno);
+        $aluno->update($dados);
+
+        return redirect()->route('alunos.index')
+            ->with('success', 'Aluno atualizado com sucesso!');
     }
 
     public function destroy($id)
@@ -68,7 +87,8 @@ class AlunoController extends Controller
         $aluno = Aluno::findOrFail($id);
         $aluno->delete();
 
-        return response()->json(null, 204);
+        return redirect()->route('alunos.index')
+            ->with('success', 'Aluno excluído com sucesso!');
     }
 
     public function restore($id)
@@ -76,28 +96,7 @@ class AlunoController extends Controller
         $aluno = Aluno::withTrashed()->findOrFail($id);
         $aluno->restore();
 
-        return response()->json($aluno);
-    }
-
-    public function search(Request $request)
-    {
-        $query = Aluno::query();
-
-        if ($request->nome) {
-            $query->where('nome', 'like', '%' . $request->nome . '%');
-        }
-
-        if ($request->cpf) {
-            $query->where('cpf', $request->cpf);
-        }
-
-        if ($request->email) {
-            $query->where('email', $request->email);
-        }
-
-        $alunos = $query->with(['curso', 'turma'])
-            ->paginate(10);
-
-        return response()->json($alunos);
+        return redirect()->route('alunos.index')
+            ->with('success', 'Aluno restaurado com sucesso!');
     }
 }

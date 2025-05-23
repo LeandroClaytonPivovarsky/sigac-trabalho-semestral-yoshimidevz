@@ -2,95 +2,80 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Aluno;
+use App\Models\Categoria;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 
-class AlunoController extends Controller
+class CategoriaController extends Controller
 {
- public function index(){
-  $alunos = Aluno::with(['curso', 'turma'])
-  ->orderBy('nome')
-  ->paginate(10);
+    public function index()
+    {
+        $categorias = Categoria::orderBy('nome')
+            ->paginate(10);
 
-  return response()->json($alunos);
- }
+        return view('categorias.index', compact('categorias'));
+    }
 
- public function store(Request $request){
-  $request->validate([
-  'nome' => 'required|string|max:150',
-  'cpf' => 'required|string|size:11|unique:alunos',
-  'email' => 'required|email|unique:alunos',
-  'senha' => 'required|string|min:6',
-  'curso_id' => 'required|exists:cursos,id',
-  'turma_id' => 'required|exists:turmas,id',
-  'user_id' => 'required|exists:users,id'
-  ]);
+    public function create()
+    {
+        return view('categorias.create');
+    }
 
-  $dados = $request->all();
-  $dados['senha'] = Hash::make($request->senha);
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'descricao' => 'nullable|string'
+        ]);
 
-  $aluno = Aluno::create($dados);
+        $categoria = Categoria::create($request->all());
 
-  return response()->json($aluno, 201);
- }
+        return redirect()->route('categorias.index')
+            ->with('success', 'Categoria cadastrada com sucesso!');
+    }
 
- public function show($id){
-  $aluno = Aluno::with(['curso', 'turma', 'user'])
-  ->findOrFail($id);
+    public function show($id)
+    {
+        $categoria = Categoria::findOrFail($id);
 
-  return response()->json($aluno);
- }
+        return view('categorias.show', compact('categoria'));
+    }
 
- public function update(Request $request, $id){
-  $aluno = Aluno::findOrFail($id);
+    public function edit($id)
+    {
+        $categoria = Categoria::findOrFail($id);
+        return view('categorias.edit', compact('categoria'));
+    }
 
-  $request->validate([
-  'nome' => 'sometimes|string|max:150',
-  'cpf' => 'sometimes|string|size:11|unique:alunos,cpf,' . $aluno->id,
-  'email' => 'sometimes|email|unique:alunos,email,' . $aluno->id,
-  'senha' => 'sometimes|string|min:6',
-  'curso_id' => 'sometimes|exists:cursos,id',
-  'turma_id' => 'sometimes|exists:turmas,id'
-  ]);
+    public function update(Request $request, $id)
+    {
+        $categoria = Categoria::findOrFail($id);
 
-  $aluno->update($request->all());
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'descricao' => 'nullable|string'
+        ]);
 
-  return response()->json($aluno);
- }
+        $categoria->update($request->all());
 
- public function destroy($id){
-  $aluno = Aluno::findOrFail($id);
-  $aluno->delete();
+        return redirect()->route('categorias.index')
+            ->with('success', 'Categoria atualizada com sucesso!');
+    }
 
-  return response()->json(null, 204);
- }
+    public function destroy($id)
+    {
+        $categoria = Categoria::findOrFail($id);
+        $categoria->delete();
 
- public function restore($id){
-  $aluno = Aluno::withTrashed()->findOrFail($id);
-  $aluno->restore();
+        return redirect()->route('categorias.index')
+            ->with('success', 'Categoria excluída com sucesso!');
+    }
 
-  return response()->json($aluno);
- }
+    public function restore($id)
+    {
+        $categoria = Categoria::withTrashed()->findOrFail($id);
+        $categoria->restore();
 
- public function search(Request $request){
-  $query = Aluno::query();
-
-  if ($request->nome) {
-  $query->where('nome', 'like', '%' . $request->nome . '%');
-  }
-
-  if ($request->cpf) {
-  $query->where('cpf', $request->cpf);
-  }
-
-  if ($request->email) {
-  $query->where('email', $request->email);
-  }
-
-  $alunos = $query->with(['curso', 'turma'])
-  ->paginate(10);
-
-  return response()->json($alunos);
- }
+        return redirect()->route('categorias.index')
+            ->with('success', 'Categoria restaurada com sucesso!');
+    }
 }

@@ -4,79 +4,98 @@ namespace App\Http\Controllers;
 
 use App\Models\Documento;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
 
 class DocumentoController extends Controller
 {
     public function index()
     {
-        $documentos = Documento::with(['categoria', 'user'])
+        $documentos = Documento::with(['aluno', 'categoria'])
             ->orderBy('created_at', 'desc')
             ->paginate(10);
 
-        return response()->json($documentos);
+        return view('documentos.index', compact('documentos'));
+    }
+
+    public function create()
+    {
+        return view('documentos.create');
     }
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'arquivo' => 'required|file|max:2048',
-            'descricao' => 'required|string|max:500',
-            'horas_in' => 'required|numeric|min:0',
-            'categoria_id' => 'required|exists:categories,id',
-            'user_id' => 'required|exists:users,id',
+        $request->validate([
+            'titulo' => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+            'arquivo' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png',
+            'data_emissao' => 'required|date',
+            'aluno_id' => 'required|exists:alunos,id',
+            'categoria_id' => 'required|exists:categorias,id'
         ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+        $dados = $request->all();
+        
+        if ($request->hasFile('arquivo')) {
+            $arquivo = $request->file('arquivo');
+            $nomeArquivo = time() . '_' . $arquivo->getClientOriginalName();
+            $arquivo->move(public_path('uploads/documentos'), $nomeArquivo);
+            $dados['arquivo'] = 'uploads/documentos/' . $nomeArquivo;
         }
 
-        $path = $request->file('arquivo')->store('documentos');
+        $documento = Documento::create($dados);
 
-        $documento = Documento::create([
-            'url' => $path,
-            'descricao' => $request->descricao,
-            'horas_in' => $request->horas_in,
-            'status' => 'pendente',
-            'categoria_id' => $request->categoria_id,
-            'user_id' => $request->user_id,
-        ]);
-
-        return response()->json($documento, 201);
+        return redirect()->route('documentos.index')
+            ->with('success', 'Documento cadastrado com sucesso!');
     }
 
     public function show($id)
     {
-        $documento = Documento::with(['categoria', 'user'])->findOrFail($id);
+        $documento = Documento::with(['aluno', 'categoria'])
+            ->findOrFail($id);
 
-        return response()->json($documento);
+        return view('documentos.show', compact('documento'));
+    }
+
+    public function edit($id)
+    {
+        $documento = Documento::findOrFail($id);
+        return view('documentos.edit', compact('documento'));
     }
 
     public function update(Request $request, $id)
     {
         $documento = Documento::findOrFail($id);
 
-        $validated = $request->validate([
-            'status' => 'sometimes|in:pendente,aprovado,reprovado',
-            'horas_out' => 'nullable|numeric|min:0',
-            'comentario' => 'nullable|string|max:500',
+        $request->validate([
+            'titulo' => 'sometimes|string|max:255',
+            'descricao' => 'nullable|string',
+            'arquivo' => 'sometimes|file|mimes:pdf,doc,docx,jpg,jpeg,png',
+            'data_emissao' => 'sometimes|date',
+            'aluno_id' => 'sometimes|exists:alunos,id',
+            'categoria_id' => 'sometimes|exists:categorias,id'
         ]);
 
-        $documento->update($validated);
+        $dados = $request->all();
+        
+        if ($request->hasFile('arquivo')) {
+            $arquivo = $request->file('arquivo');
+            $nomeArquivo = time() . '_' . $arquivo->getClientOriginalName();
+            $arquivo->move(public_path('uploads/documentos'), $nomeArquivo);
+            $dados['arquivo'] = 'uploads/documentos/' . $nomeArquivo;
+        }
 
-        return response()->json($documento);
+        $documento->update($dados);
+
+        return redirect()->route('documentos.index')
+            ->with('success', 'Documento atualizado com sucesso!');
     }
 
     public function destroy($id)
     {
         $documento = Documento::findOrFail($id);
-
-        Storage::delete($documento->url);
-
         $documento->delete();
 
-        return response()->json(null, 204);
+        return redirect()->route('documentos.index')
+            ->with('success', 'Documento excluído com sucesso!');
     }
 
     public function restore($id)
@@ -84,37 +103,7 @@ class DocumentoController extends Controller
         $documento = Documento::withTrashed()->findOrFail($id);
         $documento->restore();
 
-        return response()->json($documento);
-    }
-
-    public function download($id)
-    {
-        $documento = Documento::findOrFail($id);
-
-        return Storage::download($documento->url);
-    }
-
-    public function aprovar($id)
-    {
-        $documento = Documento::findOrFail($id);
-
-        $documento->update([
-            'status' => 'aprovado',
-            'horas_out' => $documento->horas_out ?? $documento->horas_in
-        ]);
-
-        return response()->json($documento);
-    }
-
-    public function reprovar($id)
-    {
-        $documento = Documento::findOrFail($id);
-
-        $documento->update([
-            'status' => 'reprovado',
-            'horas_out' => 0
-        ]);
-
-        return response()->json($documento);
+        return redirect()->route('documentos.index')
+            ->with('success', 'Documento restaurado com sucesso!');
     }
 }

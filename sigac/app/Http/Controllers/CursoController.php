@@ -7,78 +7,83 @@ use Illuminate\Http\Request;
 
 class CursoController extends Controller
 {
- public function index()
- {
-  $cursos = Curso::with(['nivel', 'eixo'])
-  ->orderBy('nome')
-  ->paginate(10);
+    public function index()
+    {
+        $cursos = Curso::with(['categoria', 'nivel'])
+            ->orderBy('nome')
+            ->paginate(10);
 
-  return response()->json($cursos);
- }
+        return view('cursos.index', compact('cursos'));
+    }
 
- public function store(Request $request)
- {
-  $request->validate([
-  'nome' => 'required|string|max:150',
-  'sigla' => 'required|string|max:10',
-  'total_horas' => 'required|numeric|min:0',
-  'nivel_id' => 'required|exists:nivels,id',
-  'eixo_id' => 'required|exists:eixos,id'
-  ]);
+    public function create()
+    {
+        return view('cursos.create');
+    }
 
-  $curso = Curso::create($request->all());
+    public function store(Request $request)
+    {
+        $request->validate([
+            'nome' => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+            'carga_horaria' => 'required|integer|min:1',
+            'categoria_id' => 'required|exists:categorias,id',
+            'nivel_id' => 'required|exists:niveis,id'
+        ]);
 
-  return response()->json($curso, 201);
- }
+        $curso = Curso::create($request->all());
 
- public function show($id)
- {
-  $curso = Curso::with(['nivel', 'eixo', 'turmas', 'alunos'])
-  ->findOrFail($id);
+        return redirect()->route('cursos.index')
+            ->with('success', 'Curso cadastrado com sucesso!');
+    }
 
-  return response()->json($curso);
- }
+    public function show($id)
+    {
+        $curso = Curso::with(['categoria', 'nivel'])
+            ->findOrFail($id);
 
- public function update(Request $request, $id)
- {
-  $curso = Curso::findOrFail($id);
+        return view('cursos.show', compact('curso'));
+    }
 
-  $request->validate([
-  'nome' => 'sometimes|string|max:150',
-  'sigla' => 'sometimes|string|max:10',
-  'total_horas' => 'sometimes|numeric|min:0',
-  'nivel_id' => 'sometimes|exists:nivels,id',
-  'eixo_id' => 'sometimes|exists:eixos,id'
-  ]);
+    public function edit($id)
+    {
+        $curso = Curso::findOrFail($id);
+        return view('cursos.edit', compact('curso'));
+    }
 
-  $curso->update($request->all());
+    public function update(Request $request, $id)
+    {
+        $curso = Curso::findOrFail($id);
 
-  return response()->json($curso);
- }
+        $request->validate([
+            'nome' => 'sometimes|string|max:255',
+            'descricao' => 'nullable|string',
+            'carga_horaria' => 'sometimes|integer|min:1',
+            'categoria_id' => 'sometimes|exists:categorias,id',
+            'nivel_id' => 'sometimes|exists:niveis,id'
+        ]);
 
- public function destroy($id)
- {
-  $curso = Curso::findOrFail($id);
-  $curso->delete();
+        $curso->update($request->all());
 
-  return response()->json(null, 204);
- }
+        return redirect()->route('cursos.index')
+            ->with('success', 'Curso atualizado com sucesso!');
+    }
 
- public function restore($id)
- {
-  $curso = Curso::withTrashed()->findOrFail($id);
-  $curso->restore();
+    public function destroy($id)
+    {
+        $curso = Curso::findOrFail($id);
+        $curso->delete();
 
-  return response()->json($curso);
- }
+        return redirect()->route('cursos.index')
+            ->with('success', 'Curso excluído com sucesso!');
+    }
 
- public function porEixo($eixoId)
- {
-  $cursos = Curso::where('eixo_id', $eixoId)
-  ->with(['nivel'])
-  ->orderBy('nome')
-  ->get();
+    public function restore($id)
+    {
+        $curso = Curso::withTrashed()->findOrFail($id);
+        $curso->restore();
 
-  return response()->json($cursos);
- }
+        return redirect()->route('cursos.index')
+            ->with('success', 'Curso restaurado com sucesso!');
+    }
 }

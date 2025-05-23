@@ -9,40 +9,46 @@ class TurmaController extends Controller
 {
     public function index()
     {
-        $turmas = Turma::with('curso')
-            ->orderByDesc('ano')
+        $turmas = Turma::with(['curso'])
+            ->orderBy('nome')
             ->paginate(10);
 
-        return response()->json($turmas);
+        return view('turmas.index', compact('turmas'));
+    }
+
+    public function create()
+    {
+        return view('turmas.create');
     }
 
     public function store(Request $request)
     {
         $request->validate([
-            'curso_id' => 'required|exists:cursos,id',
-            'ano' => 'required|integer|min:2000|max:2100'
+            'nome' => 'required|string|max:255',
+            'descricao' => 'nullable|string',
+            'data_inicio' => 'required|date',
+            'data_fim' => 'nullable|date|after_or_equal:data_inicio',
+            'curso_id' => 'required|exists:cursos,id'
         ]);
-
-        $existe = Turma::where('curso_id', $request->curso_id)
-            ->where('ano', $request->ano)
-            ->exists();
-
-        if ($existe) {
-            return response()->json([
-                'message' => 'Já existe uma turma para este curso no ano informado'
-            ], 422);
-        }
 
         $turma = Turma::create($request->all());
 
-        return response()->json($turma, 201);
+        return redirect()->route('turmas.index')
+            ->with('success', 'Turma cadastrada com sucesso!');
     }
 
     public function show($id)
     {
-        $turma = Turma::with(['curso', 'alunos'])->findOrFail($id);
+        $turma = Turma::with(['curso'])
+            ->findOrFail($id);
 
-        return response()->json($turma);
+        return view('turmas.show', compact('turma'));
+    }
+
+    public function edit($id)
+    {
+        $turma = Turma::findOrFail($id);
+        return view('turmas.edit', compact('turma'));
     }
 
     public function update(Request $request, $id)
@@ -50,29 +56,17 @@ class TurmaController extends Controller
         $turma = Turma::findOrFail($id);
 
         $request->validate([
-            'curso_id' => 'sometimes|exists:cursos,id',
-            'ano' => 'sometimes|integer|min:2000|max:2100'
+            'nome' => 'sometimes|string|max:255',
+            'descricao' => 'nullable|string',
+            'data_inicio' => 'sometimes|date',
+            'data_fim' => 'nullable|date|after_or_equal:data_inicio',
+            'curso_id' => 'sometimes|exists:cursos,id'
         ]);
-
-        if ($request->has('curso_id') || $request->has('ano')) {
-            $cursoId = $request->curso_id ?? $turma->curso_id;
-            $ano = $request->ano ?? $turma->ano;
-
-            $existe = Turma::where('curso_id', $cursoId)
-                ->where('ano', $ano)
-                ->where('id', '!=', $id)
-                ->exists();
-
-            if ($existe) {
-                return response()->json([
-                    'message' => 'Já existe uma turma para este curso no ano informado'
-                ], 422);
-            }
-        }
 
         $turma->update($request->all());
 
-        return response()->json($turma);
+        return redirect()->route('turmas.index')
+            ->with('success', 'Turma atualizada com sucesso!');
     }
 
     public function destroy($id)
@@ -80,7 +74,8 @@ class TurmaController extends Controller
         $turma = Turma::findOrFail($id);
         $turma->delete();
 
-        return response()->json(null, 204);
+        return redirect()->route('turmas.index')
+            ->with('success', 'Turma excluída com sucesso!');
     }
 
     public function restore($id)
@@ -88,16 +83,7 @@ class TurmaController extends Controller
         $turma = Turma::withTrashed()->findOrFail($id);
         $turma->restore();
 
-        return response()->json($turma);
-    }
-
-    public function porCurso($cursoId)
-    {
-        $turmas = Turma::where('curso_id', $cursoId)
-            ->with('curso')
-            ->orderByDesc('ano')
-            ->get();
-
-        return response()->json($turmas);
+        return redirect()->route('turmas.index')
+            ->with('success', 'Turma restaurada com sucesso!');
     }
 }
