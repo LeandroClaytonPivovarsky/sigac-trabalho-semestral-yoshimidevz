@@ -12,7 +12,7 @@ use App\Http\Controllers\NivelController;
 use App\Http\Controllers\TurmaController;
 
 // Rota principal
-Route::get('/home', [HomeController::class, 'index'])->name('home');
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 // Rotas para Alunos
 Route::resource('alunos', AlunoController::class);
