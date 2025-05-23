@@ -1,6 +1,5 @@
 <?php
 
-use App\Models\Pessoa;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -12,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('pessoas', function (Blueprint $table) {
-            $table->string('cpf');
+        Schema::create('documento_role', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('documento_id')->constrained();
+            $table->foreignId('role_id')->constrained();
+            $table->timestamps();
         });
     }
 
@@ -22,10 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('pessoas', function (Blueprint $table) {
-            if (!Schema::hasColumn('pessoas', 'cpf')) {
-                $table->string('cpf')->after('id');
-            }
-        });
+        Schema::dropIfExists('documento_role');
     }
 };

@@ -13,10 +13,15 @@ return new class extends Migration
     {
         Schema::create('alunos', function (Blueprint $table) {
             $table->id();
-            $table->string('nome');
-            $table->string('cpf')->unique();
+            $table->string('nome', 150);
+            $table->string('cpf', 11)->unique();
             $table->string('email')->unique();
-            $table->string('telefone')->nulltable();
+            $table->string('senha');
+            $table->foreignId('curso_id')->constrained();
+            $table->foreignId('turma_id')->constrained();
+            $table->foreignId('user_id')->constrained();
+            $table->timestamps();
+            $table->softDeletes();
         });
     }
 

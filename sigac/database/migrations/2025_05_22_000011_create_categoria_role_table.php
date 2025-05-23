@@ -11,11 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('pessoas', function (Blueprint $table) {
-            $table->id()->autoIncrement();
-            $table->string('nome');
-            $table->integer('idade');
-            $table->softDeletes();
+        Schema::create('categoria_role', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('categoria_id')->constrained();
+            $table->foreignId('role_id')->constrained();
             $table->timestamps();
         });
     }
@@ -25,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('pessoa');
+        Schema::dropIfExists('categoria_role');
     }
 };

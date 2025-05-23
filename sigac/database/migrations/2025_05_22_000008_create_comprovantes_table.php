@@ -13,7 +13,14 @@ return new class extends Migration
     {
         Schema::create('comprovantes', function (Blueprint $table) {
             $table->id();
+            $table->string('titulo');
+            $table->text('descricao')->nullable();
+            $table->string('arquivo');
+            $table->date('data_emissao');
+            $table->foreignId('aluno_id')->constrained();
+            $table->foreignId('documento_id')->constrained();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

@@ -12,14 +12,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('aluno_role', function (Blueprint $table) {
-            $table->foreignId('aluno_id')->constrained('alunos')->onDelete('cascade');
-            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
-
-            $table->primary(['aluno_id', 'role_id']);
+            $table->id();
+            $table->foreignId('aluno_id')->constrained();
+            $table->foreignId('role_id')->constrained();
             $table->timestamps();
         });
     }
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('aluno_role');
