@@ -17,8 +17,8 @@ return new class extends Migration
             $table->text('descricao')->nullable();
             $table->string('arquivo');
             $table->date('data_emissao');
-            $table->foreignId('aluno_id')->constrained();
-            $table->foreignId('documento_id')->constrained();
+            $table->foreignId('aluno_id')->constrained('alunos')->onDelete('cascade');
+            $table->foreignId('documento_id')->constrained('documentos')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

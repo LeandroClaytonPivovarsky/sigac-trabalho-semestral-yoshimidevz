@@ -16,8 +16,8 @@ return new class extends Migration
             $table->string('nome');
             $table->text('descricao')->nullable();
             $table->integer('carga_horaria');
-            $table->foreignId('categoria_id')->constrained();
-            $table->foreignId('nivel_id')->constrained();
+            $table->foreignId('categoria_id')->constrained('categorias')->onDelete('cascade');
+            $table->foreignId('nivel_id')->constrained('niveis')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

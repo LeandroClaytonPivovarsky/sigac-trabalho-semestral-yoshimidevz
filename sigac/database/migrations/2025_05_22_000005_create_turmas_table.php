@@ -17,7 +17,8 @@ return new class extends Migration
             $table->text('descricao')->nullable();
             $table->date('data_inicio');
             $table->date('data_fim')->nullable();
-            $table->foreignId('curso_id')->constrained();
+            $table->foreignId('curso_id')->constrained('cursos')->onDelete('cascade');
+
             $table->timestamps();
             $table->softDeletes();
         });

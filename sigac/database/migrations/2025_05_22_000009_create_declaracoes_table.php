@@ -17,7 +17,7 @@ return new class extends Migration
             $table->text('descricao')->nullable();
             $table->text('conteudo');
             $table->date('data_emissao');
-            $table->foreignId('aluno_id')->constrained();
+            $table->foreignId('aluno_id')->constrained('alunos')->onDelete('cascade');
             $table->timestamps();
             $table->softDeletes();
         });

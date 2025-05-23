@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('comprovante_role', function (Blueprint $table) {
             $table->id();
             $table->foreignId('comprovante_id')->constrained();
-            $table->foreignId('role_id')->constrained();
+            $table->foreignId('role_id')->constrained('roles')->onDelete('cascade');
             $table->timestamps();
         });
     }
