@@ -1,12 +1,12 @@
 @extends('layouts.app')
 
-@section('title', 'Alunos')
+@section('title', 'Cursos')
 
 @section('content')
 <div class="d-flex justify-content-between align-items-center mb-4">
-    <h1 class="h2">Alunos</h1>
-    <a href="{{ route('alunos.create') }}" class="btn btn-primary">
-        <i class="fas fa-plus"></i> Novo Aluno
+    <h1 class="h2">Cursos</h1>
+    <a href="{{ route('cursos.create') }}" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Novo Curso
     </a>
 </div>
 
@@ -14,11 +14,11 @@
     <div class="card-header">
         <div class="row">
             <div class="col-md-6">
-                <h5 class="mb-0">Lista de Alunos</h5>
+                <h5 class="mb-0">Lista de Cursos</h5>
             </div>
             <div class="col-md-6">
-                <form action="{{ route('alunos.index') }}" method="GET" class="d-flex">
-                    <input type="text" name="search" class="form-control me-2" placeholder="Buscar aluno..." value="{{ request('search') }}">
+                <form action="{{ route('cursos.index') }}" method="GET" class="d-flex">
+                    <input type="text" name="search" class="form-control me-2" placeholder="Buscar curso..." value="{{ request('search') }}">
                     <button type="submit" class="btn btn-outline-primary">Buscar</button>
                 </form>
             </div>
@@ -31,31 +31,29 @@
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
-                        <th>CPF</th>
-                        <th>Email</th>
-                        <th>Curso</th>
-                        <th>Turma</th>
+                        <th>Categoria</th>
+                        <th>Nível</th>
+                        <th>Carga Horária</th>
                         <th>Ações</th>
                     </tr>
                 </thead>
                 <tbody>
-                    @forelse($alunos as $aluno)
+                    @forelse($cursos as $curso)
                     <tr>
-                        <td>{{ $aluno->id }}</td>
-                        <td>{{ $aluno->nome }}</td>
-                        <td>{{ substr($aluno->cpf, 0, 3) . '.' . substr($aluno->cpf, 3, 3) . '.' . substr($aluno->cpf, 6, 3) . '-' . substr($aluno->cpf, 9, 2) }}</td>
-                        <td>{{ $aluno->email }}</td>
-                        <td>{{ $aluno->curso->nome ?? 'N/A' }}</td>
-                        <td>{{ $aluno->turma->nome ?? 'N/A' }}</td>
+                        <td>{{ $curso->id }}</td>
+                        <td>{{ $curso->nome }}</td>
+                        <td>{{ $curso->categoria->nome ?? 'N/A' }}</td>
+                        <td>{{ $curso->nivel->nome ?? 'N/A' }}</td>
+                        <td>{{ $curso->carga_horaria }} horas</td>
                         <td>
                             <div class="btn-group" role="group">
-                                <a href="{{ route('alunos.show', $aluno->id) }}" class="btn btn-sm btn-info text-white" title="Visualizar">
+                                <a href="{{ route('cursos.show', $curso->id) }}" class="btn btn-sm btn-info text-white" title="Visualizar">
                                     <i class="fas fa-eye"></i>
                                 </a>
-                                <a href="{{ route('alunos.edit', $aluno->id) }}" class="btn btn-sm btn-warning text-white" title="Editar">
+                                <a href="{{ route('cursos.edit', $curso->id) }}" class="btn btn-sm btn-warning text-white" title="Editar">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                <form action="{{ route('alunos.destroy', $aluno->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este aluno?')">
+                                <form action="{{ route('cursos.destroy', $curso->id) }}" method="POST" class="d-inline" onsubmit="return confirm('Tem certeza que deseja excluir este curso?')">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-sm btn-danger" title="Excluir">
@@ -67,7 +65,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="7" class="text-center">Nenhum aluno encontrado.</td>
+                        <td colspan="6" class="text-center">Nenhum curso encontrado.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -77,10 +75,10 @@
     <div class="card-footer">
         <div class="d-flex justify-content-between align-items-center">
             <div>
-                Exibindo {{ $alunos->count() }} de {{ $alunos->total() }} alunos
+                Exibindo {{ $cursos->count() }} de {{ $cursos->total() }} cursos
             </div>
             <div>
-                {{ $alunos->links() }}
+                {{ $cursos->links() }}
             </div>
         </div>
     </div>
