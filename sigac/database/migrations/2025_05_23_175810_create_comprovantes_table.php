@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('declaracoes', function (Blueprint $table) {
+        Schema::create('comprovantes', function (Blueprint $table) {
             $table->id();
-            $table->string('titulo');
-            $table->text('descricao')->nullable();
-            $table->text('conteudo');
-            $table->date('data_emissao');
+            $table->float('horas');
+            $table->string('atividade');
+            $table->foreignId('categoria_id')->constrained();
+            $table->foreignId('user_id')->constrained();
             $table->foreignId('aluno_id')->constrained();
             $table->timestamps();
             $table->softDeletes();
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('declaracoes');
+        Schema::dropIfExists('comprovantes');
     }
 };

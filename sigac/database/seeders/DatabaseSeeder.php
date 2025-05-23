@@ -10,7 +10,7 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             NivelSeeder::class,
-            EixoSeeder::class,
+            //EixoSeeder::class,
             CursoSeeder::class,
             TurmaSeeder::class,
             CategoriaSeeder::class,

@@ -11,11 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('documento_role', function (Blueprint $table) {
+        Schema::create('declaracoes', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('documento_id')->constrained();
-            $table->foreignId('role_id')->constrained();
+            $table->string('hash');
+            $table->dateTime('data');
+            $table->foreignId('aluno_id')->constrained();
+            $table->foreignId('comprovante_id')->constrained();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
@@ -24,6 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('documento_role');
+        Schema::dropIfExists('declaracoes');
     }
 };

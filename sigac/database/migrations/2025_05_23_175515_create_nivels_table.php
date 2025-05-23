@@ -11,14 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('comprovantes', function (Blueprint $table) {
+        Schema::create('nivels', function (Blueprint $table) {
             $table->id();
-            $table->string('titulo');
-            $table->text('descricao')->nullable();
-            $table->string('arquivo');
-            $table->date('data_emissao');
-            $table->foreignId('aluno_id')->constrained();
-            $table->foreignId('documento_id')->constrained();
+            $table->string('nome');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -29,6 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('comprovantes');
+        Schema::dropIfExists('niveis');
     }
 };
