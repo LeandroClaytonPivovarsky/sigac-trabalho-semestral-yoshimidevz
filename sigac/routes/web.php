@@ -6,14 +6,14 @@ namespace App\Http\Controllers;
 use Illuminate\Support\Facades\Route;
 // use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AlunoController;
-// use App\Http\Controllers\CategoriaController;
-// use App\Http\Controllers\ComprovanteController;
-// use App\Http\Controllers\CursoController;
-// use App\Http\Controllers\DeclaracaoController;
-// use App\Http\Controllers\DocumentoController;
-// use App\Http\Controllers\NivelController;
-// use App\Http\Controllers\TurmaController;
-// Route::get('/home', function () {
+use App\Http\Controllers\CategoriaController;
+ use App\Http\Controllers\ComprovanteController;
+use App\Http\Controllers\CursoController;
+use App\Http\Controllers\DeclaracaoController;
+use App\Http\Controllers\DocumentoController;
+use App\Http\Controllers\NivelController;
+use App\Http\Controllers\TurmaController;
+//Route::get('/home', function () {
 //     return view('test');
 // })->name('home');
 
